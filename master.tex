@@ -2,7 +2,6 @@
 
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb}
-\usepackage{colonequals}
 \usepackage{semantic}
 \usepackage{mathpartir}
 
@@ -70,12 +69,18 @@
   \and \Void = \text{void}
 \end{mathpar}
 
+A \emph{reference} is an opaque token that identifies an external resource.
+Listeners and transports are references. A \emph{port} is a reliable,
+buffered, ordered byte stream. Ports either consume or produce bytes. A
+\emph{URI} is a universal resource identifier as defined in RFC 3986,
+restricted here to URL authorities as defined in the roadmap.
+
 \subsection*{API Functions}
 
 \begin{mathpar}
-  \Connect : \Us -> \Ts
-  \and \Listen : \Us -> \Ls
+  \Listen : \Us -> \Ls
   \and \Accept : \Ls -> \Ts
+  \and \Connect : \Us -> \Ts
   \and \Release : \Ls \cup \Ts -> \Void
   \and \Send : \Ts ** \Bs -> \Void
   \and \Receive : \Ts -> \Bs
@@ -84,13 +89,16 @@
 \subsection*{Internal Functions}
 
 \begin{mathpar}
-  \Connector : \Us -> \Ts ** \Us ** \PIs ** \POs
-  \and \Listener : \Us -> \Ls
+  \Listener : \Us -> \Ls
   \and \Accepter : \Ls -> \Ts ** \Us ** \PIs ** \POs
+  \and \Connector : \Us -> \Ts ** \Us ** \PIs ** \POs
   \\
-  \Receiver : \PIs -> \Bs ** \PIs
-  \and \Sender : \Bs ** \POs -> \POs
+  \Sender : \Bs ** \POs -> \POs
+  \and \Receiver : \PIs -> \Bs ** \PIs
 \end{mathpar}
+
+An \emph{internal function} is a placeholder for implementation details that
+do not affect the API.
 
 \subsection*{Run-time Environment}
 
@@ -100,63 +108,70 @@
   \and \Pi : \Ts -> \PIs ** \POs
 \end{mathpar}
 
+The run-time state consists of three maps. Adding a binding to a map tells the
+run-time to perform a computation with visible effects until the binding is
+removed. In $\Lx$, $\cdot |--> u_L$ listens for connections on $u_L$. In
+$\Gx$, $\cdot |--> (u_L,u_R)$ establishes a connection between $u_L$ and
+$u_R$. In $\Px$, $\cdot |--> (p_I,p_O)$ opens ports $p_I$ and $p_O$ for
+reading and writing. When $\Px(t) = (p_I,p_O)$, re-binding $t |--> (p_I',p_O)$
+or $t |--> (p_I,p_O')$ tells the run-time to read or write bytes from or to
+the port.
+
 \subsection*{Operational Semantics}
 
-% define [.]S = {.} |_| S
-
 \begin{mathpar}
-  \Infer[Con]{
-    \Connector(u_R) = (t, u_L, p_I, p_O)
-  }{
-    \Lx, \Gx, \Px |- \Connect(u_R) --> \\\\
-    \Lx, [ t |--> (u_L, u_R) ] \Gx, [ t |--> (p_I, p_O) ] \Px |- t
-  }
-
   \Infer[Lsn]{
     \Listener(u_L) = \ell
   }{
-    \Lx, \Gx, \Px |- \Listen(u_L) --> \\\\
-    [ \ell |--> u_L ] \Lx, \Gx, \Px |- \ell
+    \Lx, \Gx, \Px |- \Listen(u_L) --> [ \ell |--> u_L ] \Lx, \Gx, \Px |- \ell
   }
 
   \Infer[Acc]{
     \Lx(\ell) = u_L
     \\ \Accepter(\ell) = (t, u_R, p_I, p_O)
   }{
-    \Lx, \Gx, \Px |- \Accept(\ell) -->
-    \Lx,
-    [ t |--> (u_L, u_R) ] \Gx,
-    [ t |--> (p_I, p_O) ] \Px
-    |- t
+    \Lx, \Gx, \Px |- \Accept(\ell) --> \Lx, [ t |--> (u_L, u_R) ] \Gx, [ t |--> (p_I, p_O) ] \Px |- t
+  }
+
+  \Infer[Con]{
+    \Connector(u_R) = (t, u_L, p_I, p_O)
+  }{
+    \Lx, \Gx, \Px |- \Connect(u_R) --> \Lx, [ t |--> (u_L, u_R) ] \Gx, [ t |--> (p_I, p_O) ] \Px |- t
   }
 
   \Infer[RlsL]{
   }{
-    \Lx, \Gx, \Px |- \Release(\ell) --> \\\\
-    \Lx \setminus \{ \ell |--> \cdot \}, \Gx, \Px |- \Void
+    \Lx, \Gx, \Px |- \Release(\ell) --> \Lx \setminus \{ \ell |--> \cdot \}, \Gx, \Px |- \Void
   }
 
   \Infer[RlsT]{
   }{
-    \Lx, \Gx, \Px |- \Release(t) --> \\\\
-    \Lx, \Gx \setminus \{ t |--> \cdot \}, \Px \setminus \{ t |--> \cdot \} |- \Void
+    \Lx, \Gx, \Px |- \Release(t) --> \Lx, \Gx \setminus \{ t |--> \cdot \}, \Px \setminus \{ t |--> \cdot \} |- \Void
   }
 
   \Infer[Snd]{
     \Px(t) = (p_I, p_O)
-    \\\\ \Sender(b, p_O) = p_O'
+    \\ \Sender(b, p_O) = p_O'
   }{
-    \Lx, \Gx, \Px |- \Send(t, b) --> \\\\
-    \Lx, \Gx, [ t |--> (p_I, p_O') ] \Px |- \Void
+    \Lx, \Gx, \Px |- \Send(t, b) --> \Lx, \Gx, [ t |--> (p_I, p_O') ] \Px |- \Void
   }
 
   \Infer[Rcv]{
     \Px(t) = (p_I, p_O)
-    \\\\ \Receiver(p_I) = (b, p_I')
+    \\ \Receiver(p_I) = (b, p_I')
   }{
-    \Lx, \Gx, \Px |- \Receive(t) --> \\\\
-    \Lx, \Gx, [ t |--> (p_I', p_O) ] \Px |- b
+    \Lx, \Gx, \Px |- \Receive(t) --> \Lx, \Gx, [ t |--> (p_I', p_O) ] \Px |- b
   }
 \end{mathpar}
+
+\Rule{Lsn} says $\Listen(u_L)$ produces a listener $\ell$ on URL authority
+$u_L$. \Rule{Acc} says $\Accept(\ell)$ produces a transport $t$ that, when URL
+authority $u_R$ connects to $u_L$, represents the connection between $u_L$ and
+$u_R$. \Rule{Con} says $\Connect(u_R)$ produces a transport $t$ that, when
+$u_R$ accepts the connection from a ``chosen'' URL authority $u_L$, represents
+the connection between $u_L$ and $u_R$. \Rule{Snd} says $\Send(t, b)$ writes
+the bytes in $b$ to the output port bound to $t$. \Rule{Rcv} says
+$\Receive(t)$ produces all available bytes $b$ from the input port bound to
+$t$.
 
 \end{document}
