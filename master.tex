@@ -1,0 +1,162 @@
+\documentclass[letterpaper,12pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{colonequals}
+\usepackage{semantic}
+\usepackage{mathpartir}
+
+\pagestyle{empty}
+
+% sets
+\DeclareMathOperator{\Bs}{\ensuremath{\mathcal{B}}}
+\DeclareMathOperator{\Ls}{\ensuremath{\mathcal{L}}}
+\DeclareMathOperator{\PIs}{\ensuremath{\mathcal{P_I}}}
+\DeclareMathOperator{\POs}{\ensuremath{\mathcal{P_O}}}
+\DeclareMathOperator{\Ts}{\ensuremath{\mathcal{T}}}
+\DeclareMathOperator{\Us}{\ensuremath{\mathcal{U}}}
+\DeclareMathOperator{\Void}{\ensuremath{\varnothing}}
+
+% relations
+\DeclareMathOperator{\Accept}{accept}
+\DeclareMathOperator{\Connect}{connect}
+\DeclareMathOperator{\Listen}{listen}
+\DeclareMathOperator{\Receive}{receive}
+\DeclareMathOperator{\Release}{release}
+\DeclareMathOperator{\Send}{send}
+
+% rules
+\newcommand{\Rule}[1]{\text{\textsc{#1}}}
+\newcommand{\Infer}[3][]{\inferrule{#2}{#3}~\Rule{#1}}
+
+% literals
+\newcommand{\Lt}{\text{\texttt{L}}}
+
+% variables
+\newcommand{\Lx}{\ensuremath{\Lambda}}
+\newcommand{\Gx}{\ensuremath{\Gamma}}
+\newcommand{\Px}{\ensuremath{\Pi}}
+
+% helpers
+\DeclareMathOperator{\Accepter}{accepter}
+\DeclareMathOperator{\Connector}{connector}
+\DeclareMathOperator{\Listener}{listener}
+\DeclareMathOperator{\Receiver}{receiver}
+\DeclareMathOperator{\Sender}{sender}
+
+% symbols
+\mathlig{|-->}{\mapsto}
+\mathlig{-->}{\leadsto}
+\mathlig{=>}{\Downarrow}
+\mathlig{->}{\rightarrow}
+\mathlig{|-}{\vdash}
+\mathlig{**}{\times}
+\mathlig{<}{\langle}
+\mathlig{>}{\rangle}
+
+\begin{document}
+
+\section*{Primary Constructs}
+
+\subsection*{Data Types}
+
+\begin{mathpar}
+  \Bs = \text{byte arrays}
+  \and \Ls = \text{listeners}
+  \and \PIs = \text{input ports}
+  \and \POs = \text{output ports}
+  \and \Ts = \text{transports}
+  \and \Us = \text{URIs}
+  \and \Void = \text{void}
+\end{mathpar}
+
+\subsection*{API Functions}
+
+\begin{mathpar}
+  \Connect : \Us -> \Ts
+  \and \Listen : \Us -> \Ls
+  \and \Accept : \Ls -> \Ts
+  \and \Release : \Ls \cup \Ts -> \Void
+  \and \Send : \Ts ** \Bs -> \Void
+  \and \Receive : \Ts -> \Bs
+\end{mathpar}
+
+\subsection*{Internal Functions}
+
+\begin{mathpar}
+  \Connector : \Us -> \Ts ** \Us ** \PIs ** \POs
+  \and \Listener : \Us -> \Ls
+  \and \Accepter : \Ls -> \Ts ** \Us ** \PIs ** \POs
+  \\
+  \Receiver : \PIs -> \Bs ** \PIs
+  \and \Sender : \Bs ** \POs -> \POs
+\end{mathpar}
+
+\subsection*{Run-time Environment}
+
+\begin{mathpar}
+  \Lambda : \Ls -> \Us
+  \and \Gamma : \Ts -> \Us ** \Us
+  \and \Pi : \Ts -> \PIs ** \POs
+\end{mathpar}
+
+\subsection*{Operational Semantics}
+
+% define [.]S = {.} |_| S
+
+\begin{mathpar}
+  \Infer[Con]{
+    \Connector(u_R) = (t, u_L, p_I, p_O)
+  }{
+    \Lx, \Gx, \Px |- \Connect(u_R) --> \\\\
+    \Lx, [ t |--> (u_L, u_R) ] \Gx, [ t |--> (p_I, p_O) ] \Px |- t
+  }
+
+  \Infer[Lsn]{
+    \Listener(u_L) = \ell
+  }{
+    \Lx, \Gx, \Px |- \Listen(u_L) --> \\\\
+    [ \ell |--> u_L ] \Lx, \Gx, \Px |- \ell
+  }
+
+  \Infer[Acc]{
+    \Lx(\ell) = u_L
+    \\ \Accepter(\ell) = (t, u_R, p_I, p_O)
+  }{
+    \Lx, \Gx, \Px |- \Accept(\ell) -->
+    \Lx,
+    [ t |--> (u_L, u_R) ] \Gx,
+    [ t |--> (p_I, p_O) ] \Px
+    |- t
+  }
+
+  \Infer[RlsL]{
+  }{
+    \Lx, \Gx, \Px |- \Release(\ell) --> \\\\
+    \Lx \setminus \{ \ell |--> \cdot \}, \Gx, \Px |- \Void
+  }
+
+  \Infer[RlsT]{
+  }{
+    \Lx, \Gx, \Px |- \Release(t) --> \\\\
+    \Lx, \Gx \setminus \{ t |--> \cdot \}, \Px \setminus \{ t |--> \cdot \} |- \Void
+  }
+
+  \Infer[Snd]{
+    \Px(t) = (p_I, p_O)
+    \\\\ \Sender(b, p_O) = p_O'
+  }{
+    \Lx, \Gx, \Px |- \Send(t, b) --> \\\\
+    \Lx, \Gx, [ t |--> (p_I, p_O') ] \Px |- \Void
+  }
+
+  \Infer[Rcv]{
+    \Px(t) = (p_I, p_O)
+    \\\\ \Receiver(p_I) = (b, p_I')
+  }{
+    \Lx, \Gx, \Px |- \Receive(t) --> \\\\
+    \Lx, \Gx, [ t |--> (p_I', p_O) ] \Px |- b
+  }
+\end{mathpar}
+
+\end{document}
