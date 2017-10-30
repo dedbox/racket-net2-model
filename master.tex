@@ -98,7 +98,11 @@ restricted here to URL authorities as defined in the roadmap.
 \end{mathpar}
 
 An \emph{internal function} is a placeholder for implementation details that
-do not affect the API.
+do not affect the API. $\Listener(\cdot)$ makes a listener. $\Accepter(\cdot)$
+makes transport components for an accepted connection. $\Connector(\cdot)$
+makes transport components for a connection attempt. $\Sender(\cdot)$ copies
+bytes from a byte array to an output port. $\Receiver(\cdot)$ copies bytes
+from an input port to a byte array.
 
 \subsection*{Run-time Environment}
 
