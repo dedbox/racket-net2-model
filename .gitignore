@@ -1,4 +1,8 @@
 *.aux
-*.log
+*.bib
+*.bbl
+*.blg
+*.lo?
 *.pdf
+*.toc
 !/master.pdf
