@@ -1,28 +1,61 @@
-\documentclass[letterpaper,12pt]{article}
+%% Copyright 2017 Eric Griffis <dedbox@gmail.com>
+%% 
+%% Licensed under the Apache License, Version 2.0 (the "License");
+%% you may not use this file except in compliance with the License.
+%% You may obtain a copy of the License at
+%% 
+%% http://www.apache.org/licenses/LICENSE-2.0
+%% 
+%% Unless required by applicable law or agreed to in writing, software
+%% distributed under the License is distributed on an "AS IS" BASIS,
+%% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+%% See the License for the specific language governing permissions and
+%% limitations under the License.
 
+\documentclass[letterpaper,12pt,openany]{report}
+
+\newcommand{\NetTwo}{\texttt{net2}}
+
+\title{\NetTwo  \\ Technical Specification}
+\author{Eric Griffis \\ dedbox@gmail.com}
+\date{\today}
+
+% draft watermark
+\usepackage[firstpage]{draftwatermark}
+\SetWatermarkScale{7}
+
+% general includes
 \usepackage[margin=1in]{geometry}
+\usepackage{color}
 \usepackage{amsmath,amssymb}
+\usepackage{upgreek}
 \usepackage{semantic}
 \usepackage{mathpartir}
+\usepackage{colonequals}
+\usepackage{array}
+\usepackage{natbib}
+\usepackage{tocbibind}
+\usepackage{fancyvrb}
 
-\pagestyle{empty}
+\newenvironment{XXX}{\color{red}}{}
+\newcommand{\xxx}[1]{\begin{XXX}#1\end{XXX}}
 
 % sets
 \DeclareMathOperator{\Bs}{\ensuremath{\mathcal{B}}}
 \DeclareMathOperator{\Ls}{\ensuremath{\mathcal{L}}}
-\DeclareMathOperator{\PIs}{\ensuremath{\mathcal{P_I}}}
-\DeclareMathOperator{\POs}{\ensuremath{\mathcal{P_O}}}
+\DeclareMathOperator{\Is}{\ensuremath{\mathcal{I}}}
+\DeclareMathOperator{\Os}{\ensuremath{\mathcal{O}}}
 \DeclareMathOperator{\Ts}{\ensuremath{\mathcal{T}}}
 \DeclareMathOperator{\Us}{\ensuremath{\mathcal{U}}}
 \DeclareMathOperator{\Void}{\ensuremath{\varnothing}}
 
 % relations
-\DeclareMathOperator{\Accept}{accept}
-\DeclareMathOperator{\Connect}{connect}
-\DeclareMathOperator{\Listen}{listen}
-\DeclareMathOperator{\Receive}{receive}
-\DeclareMathOperator{\Release}{release}
-\DeclareMathOperator{\Send}{send}
+\DeclareMathOperator{\Accept}{\textsf{accept}}
+\DeclareMathOperator{\Connect}{\textsf{connect}}
+\DeclareMathOperator{\Listen}{\textsf{listen}}
+\DeclareMathOperator{\Receive}{\textsf{receive}}
+\DeclareMathOperator{\Release}{\textsf{release}}
+\DeclareMathOperator{\Send}{\textsf{send}}
 
 % rules
 \newcommand{\Rule}[1]{\text{\textsc{#1}}}
@@ -35,6 +68,7 @@
 \newcommand{\Lx}{\ensuremath{\Lambda}}
 \newcommand{\Gx}{\ensuremath{\Gamma}}
 \newcommand{\Px}{\ensuremath{\Pi}}
+\newcommand{\Tx}{\ensuremath{\uptau}}
 
 % helpers
 \DeclareMathOperator{\Accepter}{accepter}
@@ -53,94 +87,234 @@
 \mathlig{<}{\langle}
 \mathlig{>}{\rangle}
 
+% layout
+\newcolumntype{L}{>{$}l<{$}}
+\newcolumntype{C}{>{$}c<{$}}
+\newcolumntype{R}{>{$}r<{$}}
+\newcolumntype{+}{@{~}}
+\newcolumntype{^}{@{\extracolsep{\fill}}}
+\newcolumntype{=}[1]{@{$#1$}}
+
+\newenvironment{Grammar}{
+  \begin{tabular}[t]{l}
+    \begin{minipage}[t]{.45\linewidth}
+      \begin{tabular*}{\linewidth}{L+C+L^r}
+}{
+      \end{tabular*}
+    \end{minipage}
+  \end{tabular}
+}
+
+%%
+%% References
+%%
+
+\begin{filecontents*}{references.bib}
+@article{berners2014rfc,
+  title={Rfc 3986, uniform resource identifier (uri): Generic syntax, 2005},
+  author={Berners-Lee, Tim and Fielding, Roy and Masinter, Larry},
+  journal={URL: http://www. faqs. org/rfcs/rfc3986. html},
+  year={2014}
+}
+\end{filecontents*}
+
+%%%%
+%%%% DOCUMENT
+%%%%
+
 \begin{document}
 
-\section*{Primary Constructs}
+%%
+%% Front Matter
+%%
 
-\subsection*{Data Types}
+\pagenumbering{roman}
+
+\maketitle
+
+\begin{abstract}
+  This is a technical specification for {\NetTwo}, a networking abstraction
+  for URL-addressable agents communicating via byte streams. Its purpose is to
+  drive the engineering design process and to support future work.
+\end{abstract}
+
+\tableofcontents
+
+\clearpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\pagestyle{plain}
+
+%%
+%% Body Matter
+%%
+
+\chapter{Formalism}
+
+This chapter defines an abstract model for the primary constructs of
+{\NetTwo}. The model exposes six primary operations and five primitive data
+types.
+
+\section{URIs}
+
+\begin{XXX}
+  \begin{itemize}
+  \item Explain how URIs work in {\NetTwo}.
+  \item So far, all operations restrict URIs to URL authorities.
+  \end{itemize}
+\end{XXX}
+
+\section{Primitive data}
+
+All primitive data is opaque \xxx{ for now...}
+
+\subsection*{References}
 
 \begin{mathpar}
-  \Bs = \text{byte arrays}
-  \and \Ls = \text{listeners}
-  \and \PIs = \text{input ports}
-  \and \POs = \text{output ports}
+  \Ls = \text{listeners}
   \and \Ts = \text{transports}
-  \and \Us = \text{URIs}
+\end{mathpar}
+
+A \emph{reference} is an opaque token that identifies a portion of run-time
+state. A listener identifies a bound URL authority and a host platform hook
+for accept connection requests. A transport identifies the URLs of its
+endpoints and a pair of ports.
+
+\subsection*{Ports}
+
+\begin{mathpar}
+  \Is = \text{input ports}
+  \and \Os = \text{output ports}
+\end{mathpar}
+
+A \emph{port} is a host platform object that represents one side of a byte
+stream. An input port receives bytes. An output port send bytes.
+
+\subsection*{Structures}
+
+\begin{mathpar}
+  \Us = \text{URLs}
+  \and \Bs = \text{byte arrays}
   \and \Void = \text{void}
 \end{mathpar}
 
-A \emph{reference} is an opaque token that identifies an external resource.
-Listeners and transports are references. A \emph{port} is a reliable,
-buffered, ordered byte stream. Ports either consume or produce bytes. A
-\emph{URI} is a universal resource identifier as defined in RFC 3986,
-restricted here to URL authorities as defined in the roadmap.
+A \emph{structure} is a host platform data structure. A URL addresses an
+agent. A byte array is a unit of data exchange. The void constant $\Void$ is
+returned by operations with a side-effect and no useful result.
 
-\subsection*{API Functions}
+\section{The {\NetTwo} API}
+
+The API exposes six primary operations. Four create or destroy connections.
+Two exchange bytes over ports.
+
+\subsection*{Connections}
 
 \begin{mathpar}
   \Listen : \Us -> \Ls
   \and \Accept : \Ls -> \Ts
   \and \Connect : \Us -> \Ts
   \and \Release : \Ls \cup \Ts -> \Void
-  \and \Send : \Ts ** \Bs -> \Void
+\end{mathpar}
+
+\paragraph{$\Listen(u) = \ell$} Starts accepting connections to URL authority
+$u$. Binds accepted connections to listener $\ell$.
+
+\paragraph{$\Accept(\ell) = \Tx$} Claims a connection bound to listener
+$\ell$. Blocks until an unclaimed connection is available. Binds a pair of
+ports to transport $\Tx$.
+
+\paragraph{$\Connect(u) = \Tx$} Requests a connection to URL authority $u$
+over transport $\Tx$. Blocks until the host system resolves the request. Binds
+a pair of ports to transport $\Tx$.
+
+\paragraph{$\Release(\ell) = \Void$} Stops accepting connections to the URL
+authority bound to listener $\ell$. Unbinds $\ell$.
+
+\paragraph{$\Release(\Tx) = \Void$} Closes the ports bound to $\Tx$. Unbinds
+$\Tx$.
+
+\subsection*{Ports}
+
+\begin{mathpar}
+  \Send : \Ts ** \Bs -> \Void
   \and \Receive : \Ts -> \Bs
 \end{mathpar}
 
-\subsection*{Internal Functions}
+\paragraph{$\Send(\Tx, b) = \Void$} Sends byte array $b$ over transport $\Tx$.
+
+\paragraph{$\Receive(\Tx) = b$} Receives byte array $b$ over transport $\Tx$.
+
+\section{Host platform support}
 
 \begin{mathpar}
   \Listener : \Us -> \Ls
-  \and \Accepter : \Ls -> \Ts ** \Us ** \PIs ** \POs
-  \and \Connector : \Us -> \Ts ** \Us ** \PIs ** \POs
+  \and \Accepter : \Ls -> \Ts ** \Us ** \Is ** \Os
   \\
-  \Sender : \Bs ** \POs -> \POs
-  \and \Receiver : \PIs -> \Bs ** \PIs
+  \Connector : \Us -> \Ts ** \Us ** \Is ** \Os
+  \\
+  \Sender : \Bs ** \Os -> \Os
+  \and \Receiver : \Is -> \Bs ** \Is
 \end{mathpar}
 
-An \emph{internal function} is a placeholder for implementation details that
-do not affect the API. $\Listener(\cdot)$ makes a listener. $\Accepter(\cdot)$
-makes transport components for an accepted connection. $\Connector(\cdot)$
-makes transport components for a connection attempt. $\Sender(\cdot)$ copies
-bytes from a byte array to an output port. $\Receiver(\cdot)$ copies bytes
-from an input port to a byte array.
+\section{Formal syntax and semantics}
 
-\subsection*{Run-time Environment}
+\begin{Grammar}
+  t
+  &::=& \Listen(t) & bind to URL \\
+  & | & \Accept(t) & accept connection \\
+  & | & \Connect(t) & connect to URL \\
+  & | & \Release(t) & disconnect \\
+  & | & \Send(t, t) & bytes out \\
+  & | & \Receive(t) & bytes in \\
+\end{Grammar}
+\hfill
+\begin{Grammar}
+  v
+  &::=& b & byte array \\
+  & | & \ell & listener \\
+  & | & \Tx & transport \\
+  & | & u & URL \\
+  & | & \Void & void \\[4ex]
+\end{Grammar}
+
+\subsection*{The run-time environment}
 
 \begin{mathpar}
   \Lambda : \Ls -> \Us
   \and \Gamma : \Ts -> \Us ** \Us
-  \and \Pi : \Ts -> \PIs ** \POs
+  \and \Pi : \Ts -> \Is ** \Os
 \end{mathpar}
 
-The run-time state consists of three maps. Adding a binding to a map tells the
-run-time to perform a computation with visible effects until the binding is
-removed. In $\Lx$, $\cdot |--> u_L$ listens for connections on $u_L$. In
-$\Gx$, $\cdot |--> (u_L,u_R)$ establishes a connection between $u_L$ and
-$u_R$. In $\Px$, $\cdot |--> (p_I,p_O)$ opens ports $p_I$ and $p_O$ for
+The run-time state consists of three maps, each representing a distinct realm
+of effect. When a binding exists, its effects are visible. Adding a binding to
+a map tells the run-time to perform a computation with visible effects until
+the binding is removed. In $\Lx$, $\cdot |--> u_L$ listens for connections on
+$u_L$. In $\Gx$, $\cdot |--> (u_L,u_R)$ establishes a connection between $u_L$
+and $u_R$. In $\Px$, $\cdot |--> (p_I,p_O)$ opens ports $p_I$ and $p_O$ for
 reading and writing. When $\Px(t) = (p_I,p_O)$, re-binding $t |--> (p_I',p_O)$
 or $t |--> (p_I,p_O')$ tells the run-time to read or write bytes from or to
 the port.
 
-\subsection*{Operational Semantics}
-
 \begin{mathpar}
   \Infer[Lsn]{
-    \Listener(u_L) = \ell
+    \ell = \Listener(u)
   }{
-    \Lx, \Gx, \Px |- \Listen(u_L) --> [ \ell |--> u_L ] \Lx, \Gx, \Px |- \ell
+    \Lx |- \Listen(u) --> [ \ell |--> u ] \Lx |- \ell
   }
+\end{mathpar}
 
+\begin{mathpar}
   \Infer[Acc]{
     \Lx(\ell) = u_L
-    \\ \Accepter(\ell) = (t, u_R, p_I, p_O)
+    \\ \Accepter(\ell) = (\Tx, u_R, p_I, p_O)
   }{
-    \Lx, \Gx, \Px |- \Accept(\ell) --> \Lx, [ t |--> (u_L, u_R) ] \Gx, [ t |--> (p_I, p_O) ] \Px |- t
+    \Lx, \Gx, \Px |- \Accept(\ell) --> \Lx, [ \Tx |--> (u_L, u_R) ] \Gx, [ \Tx |--> (p_I, p_O) ] \Px |- \Tx
   }
 
   \Infer[Con]{
-    \Connector(u_R) = (t, u_L, p_I, p_O)
+    \Connector(u_R) = (\Tx, u_L, p_I, p_O)
   }{
-    \Lx, \Gx, \Px |- \Connect(u_R) --> \Lx, [ t |--> (u_L, u_R) ] \Gx, [ t |--> (p_I, p_O) ] \Px |- t
+    \Lx, \Gx, \Px |- \Connect(u_R) --> \Lx, [ \Tx |--> (u_L, u_R) ] \Gx, [ \Tx |--> (p_I, p_O) ] \Px |- \Tx
   }
 
   \Infer[RlsL]{
@@ -150,32 +324,88 @@ the port.
 
   \Infer[RlsT]{
   }{
-    \Lx, \Gx, \Px |- \Release(t) --> \Lx, \Gx \setminus \{ t |--> \cdot \}, \Px \setminus \{ t |--> \cdot \} |- \Void
+    \Lx, \Gx, \Px |- \Release(\Tx) --> \Lx, \Gx \setminus \{ \Tx |--> \cdot \}, \Px \setminus \{ \Tx |--> \cdot \} |- \Void
   }
 
   \Infer[Snd]{
-    \Px(t) = (p_I, p_O)
+    \Px(\Tx) = (p_I, p_O)
     \\ \Sender(b, p_O) = p_O'
   }{
-    \Lx, \Gx, \Px |- \Send(t, b) --> \Lx, \Gx, [ t |--> (p_I, p_O') ] \Px |- \Void
+    \Lx, \Gx, \Px |- \Send(\Tx, b) --> \Lx, \Gx, [ \Tx |--> (p_I, p_O') ] \Px |- \Void
   }
 
   \Infer[Rcv]{
-    \Px(t) = (p_I, p_O)
+    \Px(\Tx) = (p_I, p_O)
     \\ \Receiver(p_I) = (b, p_I')
   }{
-    \Lx, \Gx, \Px |- \Receive(t) --> \Lx, \Gx, [ t |--> (p_I', p_O) ] \Px |- b
+    \Lx, \Gx, \Px |- \Receive(\Tx) --> \Lx, \Gx, [ \Tx |--> (p_I', p_O) ] \Px |- b
   }
 \end{mathpar}
 
 \Rule{Lsn} says $\Listen(u_L)$ produces a listener $\ell$ on URL authority
-$u_L$. \Rule{Acc} says $\Accept(\ell)$ produces a transport $t$ that, when URL
-authority $u_R$ connects to $u_L$, represents the connection between $u_L$ and
-$u_R$. \Rule{Con} says $\Connect(u_R)$ produces a transport $t$ that, when
-$u_R$ accepts the connection from a ``chosen'' URL authority $u_L$, represents
-the connection between $u_L$ and $u_R$. \Rule{Snd} says $\Send(t, b)$ writes
-the bytes in $b$ to the output port bound to $t$. \Rule{Rcv} says
-$\Receive(t)$ produces all available bytes $b$ from the input port bound to
-$t$.
+$u_L$. \Rule{Acc} says $\Accept(\ell)$ produces a transport $\Tx$ that, when
+URL authority $u_R$ connects to $u_L$, represents the connection between $u_L$
+and $u_R$. \Rule{Con} says $\Connect(u_R)$ produces a transport $\Tx$ that,
+when $u_R$ accepts the connection from a ``chosen'' URL authority $u_L$,
+represents the connection between $u_L$ and $u_R$. \Rule{Snd} says
+$\Send(\Tx, b)$ writes the bytes in $b$ to the output port bound to $\Tx$.
+\Rule{Rcv} says $\Receive(\Tx)$ produces all available bytes $b$ from the
+input port bound to $\Tx$.
+
+%%
+%% Back Matter
+%%
+
+\newcommand{\BackChapter}[1]{\chapter*{#1}\addcontentsline{toc}{chapter}{#1}}
+
+\appendix
+
+\BackChapter{Glossary}
+
+\newcommand{\GlossaryItem}[2]{
+  \noindent
+  \paragraph{#1} #2\vspace{-1ex}
+}
+
+\GlossaryItem{agent}{A URL-addressable process capable of exchanging bytes
+  over the network.}
+
+\GlossaryItem{byte array}{A finite sequence of bytes.}
+
+\GlossaryItem{byte stream}{A one-way communications channel.}
+
+\GlossaryItem{connector}{A means of requesting a connection to another agent.}
+
+\GlossaryItem{dictionary}{A binary relation between references and run-time
+  state}.
+
+\GlossaryItem{host platform}{The programming platform implementing {\NetTwo}.}
+
+\GlossaryItem{input port}{A port that receives bytes.}
+
+\GlossaryItem{listener}{A means of accepting connection requests from other
+  agents.}
+
+\GlossaryItem{output port}{A port that sends bytes.}
+
+\GlossaryItem{port}{One end of a byte stream.}
+
+\GlossaryItem{reference}{An opaque token that identifies a set of related
+  objects.}
+
+\GlossaryItem{structure}{A host platform data structure.}
+
+\GlossaryItem{transport}{A reliable, buffered, and ordered means of exchanging
+  bytes with other agents through ports.}
+
+\GlossaryItem{URL authority}{A URL, as defined in RFC
+  3986~\cite{berners2014rfc}, that addresses an agent.}
+
+\bibliographystyle{alpha}
+\bibliography{references.bib} 
+
+\BackChapter{License}
+
+\VerbatimInput{LICENSE}
 
 \end{document}
