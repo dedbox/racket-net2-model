@@ -392,7 +392,7 @@ Creates a port update $p_I'$ that reads byte array $b$ from port $p_I$.
     &::=& \Listen(t) & bind authority \\
     & | & \Accept(t) & accept connection \\
     & | & \Connect(t) & connect to authority \\
-    & | & \Release(t) & disconnect \\
+    & | & \Release(t) & unbind / disconnect \\
     & | & \Send(t, t) & send bytes \\
     & | & \Receive(t) & receive bytes \\
   \end{Grammar}
