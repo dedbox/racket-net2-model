@@ -16,11 +16,10 @@
 
 \newcommand{\NetTwo}{\texttt{net2}}
 
+% title page
 \title{\NetTwo  \\ Technical Specification}
 \author{Eric Griffis \\ dedbox@gmail.com}
 \date{\today}
-
-% draft watermark
 \usepackage[firstpage]{draftwatermark}
 \SetWatermarkScale{7}
 
@@ -34,10 +33,9 @@
 \usepackage{mathpartir}
 \usepackage{colonequals}
 \usepackage{array}
-\usepackage{natbib}
-\usepackage{tocbibind}
 \usepackage{fancyvrb}
 
+% debugging and drafting
 \newenvironment{xxx}{\color{red}}{}
 \newcommand{\XXX}[1]{\begin{xxx}#1\end{xxx}}
 
@@ -127,10 +125,13 @@
   \paragraph{#1} #2\vspace{-1ex}
 }
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  REFERENCES  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{natbib}
+\usepackage{tocbibind}
+\renewcommand{\bibname}{References}
 
 \begin{filecontents*}{references.bib}
 @article{berners2014rfc,
@@ -177,6 +178,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  CHAPTER  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Introduction}
+\label{cha:introduction}
 
 This report defines an abstract model for {\NetTwo}.
 
@@ -201,6 +203,7 @@ This report defines an abstract model for {\NetTwo}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  CHAPTER  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{URI}
+\label{cha:uri}
 
 \begin{xxx}
   \begin{itemize}
@@ -237,8 +240,13 @@ This report defines an abstract model for {\NetTwo}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  CHAPTER  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Transport}
+\label{cha:transport}
+
+A \emph{byte stream} is a one-way communications channel. A \emph{connection}
+is a pair of opposing byte streams.
 
 \section{Primitive types}
+\label{sec:transport-primitive-types}
 
 \subsection*{References}
 
@@ -250,9 +258,9 @@ This report defines an abstract model for {\NetTwo}.
   \Rs = \Ls \cup \Ts
 \end{mathpar}
 
-A \emph{reference} is an opaque token that identifies a portion of run-time
-state. A listener references a connection request queue. A transport
-references its endpoints and ports.
+A \emph{reference} is an opaque token that represents a portion of run-time
+state. A listener represents a connection request queue. A transport
+represents a connection.
 
 \subsection*{Ports}
 
@@ -280,6 +288,7 @@ exchange. The void literal is returned by operations with a side effect and no
 useful result.
 
 \section{Dictionaries}
+\label{sec:transport-dictionaries}
 
 \begin{mathpar}
   \Ds = \{\Rs -> *\}
@@ -301,6 +310,7 @@ to some underlying data. Associations can be added, removed, or looked up.
 \end{figure}
 
 \section{The run-time state}
+\label{sec:transport-run-time-state}
 
 \begin{mathpar}
   \Lx : \Ls -> \As
@@ -322,6 +332,7 @@ $a_R$ for as long as $\Tx(\T) = (a_L, a_R, p_I, p_O)$. Updating $p_I$ or $p_O$
 will exchange bytes over the connection.
 
 \section{The Agent API}
+\label{sec:transport-agent-api}
 
 A registered name driver implements the operations defined in this section.
 
@@ -371,6 +382,7 @@ Creates a port update $p_O'$ that writes byte array $b$ to port $p_O$.
 Creates a port update $p_I'$ that reads byte array $b$ from port $p_I$.
 
 \section{Creating and destroying connections}
+\label{sec:transport-creat-destr-conn}
 
 \begin{figure}
   \centering
@@ -457,6 +469,7 @@ Stops listening when $r$ is a listener. Closes the connection when $r$ is a
 transport.
 
 \section{Exchanging bytes}
+\label{sec:transport-exchanging-bytes}
 
 \begin{mathpar}
   \Send : \Bs ** \Ts -> \Void
@@ -489,6 +502,13 @@ Receives byte array $b$ over transport $\T$.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  CHAPTER  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \chapter{Protocol}
+\label{cha:protocol}
+
+\section{Codecs}
+
+\section{Messengers}
+
+\section{Clients and servers}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  BACK MATTER  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -497,6 +517,7 @@ Receives byte array $b$ over transport $\T$.
 \appendix
 
 \BackChapter{Glossary}
+\label{cha:glossary}
 
 \GlossaryItem{agent}{A URL-addressable process capable of exchanging bytes.}
 
@@ -506,9 +527,9 @@ Receives byte array $b$ over transport $\T$.
 
 \GlossaryItem{byte array}{A finite sequence of bytes.}
 
-\GlossaryItem{byte stream}{A uni-directional communications channel.}
+\GlossaryItem{byte stream}{A one-way communications channel.}
 
-\GlossaryItem{connection}{A bi-directional communications channel.}
+\GlossaryItem{connection}{A two-way communications channel.}
 
 \GlossaryItem{connector}{A means of requesting a connection to another agent.}
 
@@ -541,8 +562,10 @@ Receives byte array $b$ over transport $\T$.
 
 \bibliographystyle{alpha}
 \bibliography{references.bib} 
+\label{cha:references}
 
 \BackChapter{License}
+\label{cha:license}
 
 \VerbatimInput{LICENSE}
 
