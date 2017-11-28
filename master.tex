@@ -71,6 +71,9 @@
 \DeclareMathOperator{\Release}{\textsf{release}}
 \DeclareMathOperator{\Send}{\textsf{send}}
 
+\DeclareMathOperator{\Decode}{\textsf{decode}}
+\DeclareMathOperator{\Encode}{\textsf{encode}}
+
 % variables
 \newcommand{\Lx}{\text{L}}
 \newcommand{\Tx}{\text{T}}
@@ -522,6 +525,22 @@ Receives byte array $b$ over transport $\T$.
 \end{figure}
 
 \section{Codecs}
+
+\begin{xxx}
+  $\Encode : * -> *$ is too generic. $\Decode : * -> *$ is too generic. This
+  can't be a driver API (like the Agent API) because the encode/decode
+  operations are too generic to specify meaningfully. We can start with a set
+  of primitive codecs.
+\end{xxx}
+
+A \emph{codec} is a composable \XXX{(and invertible?)} procedure for
+restructuring data.
+
+Example codecs:
+\begin{itemize}
+\item restructuring
+\item marshalling / serialization
+\end{itemize}
 
 \section{Messengers}
 
