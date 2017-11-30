@@ -47,8 +47,9 @@
 \DeclareMathOperator{\Bs}{\ensuremath{\mathcal{B}}}
 \DeclareMathOperator{\Cs}{\ensuremath{\mathcal{C}}}
 \DeclareMathOperator{\Ds}{\ensuremath{\mathcal{D}}}
-\DeclareMathOperator{\Ls}{\ensuremath{\mathcal{L}}}
 \DeclareMathOperator{\Is}{\ensuremath{\mathcal{I}}}
+\DeclareMathOperator{\Ls}{\ensuremath{\mathcal{L}}}
+\DeclareMathOperator{\Ms}{\ensuremath{\mathcal{M}}}
 \DeclareMathOperator{\Os}{\ensuremath{\mathcal{O}}}
 \DeclareMathOperator{\Ps}{\ensuremath{\mathcal{P}}}
 \DeclareMathOperator{\Qs}{\ensuremath{\mathcal{Q}}}
@@ -74,10 +75,15 @@
 \DeclareMathOperator{\Decode}{\textsf{decode}}
 \DeclareMathOperator{\Encode}{\textsf{encode}}
 
+\DeclareMathOperator{\Messenger}{\textsf{messenger}}
+\DeclareMathOperator{\Read}{\textsf{read}}
+\DeclareMathOperator{\Write}{\textsf{write}}
+
 % variables
 \newcommand{\Lx}{\text{L}}
 \newcommand{\Tx}{\text{T}}
 \newcommand{\Dx}{\text{D}}
+\newcommand{\Mx}{\text{M}}
 \newcommand{\T}{\uptau}
 
 % helpers
@@ -524,6 +530,11 @@ Receives byte array $b$ over transport $\T$.
   \label{fig:protocol-api-stack}
 \end{figure}
 
+\section{Frames}
+
+A \emph{frame} is a byte array of computable length, and \emph{framing} is the
+act of assembling bytes into frames.
+
 \section{Codecs}
 
 \begin{xxx}
@@ -543,6 +554,57 @@ Example codecs:
 \end{itemize}
 
 \section{Messengers}
+
+\subsection*{Primitive types}
+
+\begin{mathpar}
+  \Ms = \text{messengers}
+\end{mathpar}
+
+\subsection*{Run-time state}
+
+\begin{mathpar}
+  \Mx : \Ms -> 2^{\Cs} ** \Ts
+\end{mathpar}
+
+\subsection*{Creating and destroying messengers}
+
+\begin{mathpar}
+  \Messenger : 2^{\Cs} ** \Ts -> \Ms
+
+  \Messenger(cs, t) = m
+
+  \Infer[Msn]{
+  }{
+    \Mx |- \Messenger(cs, t) --> [m |--> <cs, t>]\Mx |- m
+  }
+
+  \Infer[RlsM]{
+    \Mx(m) = <cs, t> \and \Tx |- \Release(t) --> \Tx' |- \Void
+  }{
+    \Mx, \Tx |- \Release(m) --> \Mx \setminus \{m |--> \cdot\}, \Tx' |- \Void
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \Read : \Ms -> \Bs
+
+  \Read(m) = b
+
+  \Infer[Rd]{
+  }{
+    \Mx |- \Read(m) --> \Mx' |- b
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \Write : \Bs ** \Ms -> \Void
+
+  \Infer[Wr]{
+  }{
+    \Mx |- \Write(b, m) --> \Mx' |- \Void
+  }
+\end{mathpar}
 
 \section{Clients and servers}
 
