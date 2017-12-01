@@ -320,7 +320,7 @@ to some underlying data. Associations can be added, removed, or looked up.
   \label{fig:dictionary-notation}
 \end{figure}
 
-\section{The run-time state}
+\section{Run-time state}
 \label{sec:transport-run-time-state}
 
 \begin{mathpar}
@@ -532,14 +532,13 @@ Receives byte array $b$ over transport $\T$.
   \label{fig:protocol-api-stack}
 \end{figure}
 
-\section{Frames}
-\label{sec:protocol-frames}
-
-A \emph{frame} is a byte array of computable length, and \emph{framing} is the
-act of assembling bytes into frames.
-
 \section{Codecs}
 \label{sec:protocol-codecs}
+
+A \emph{codec} is a composable and invertible function for structured data
+serialization and other restructuring operations. A \emph{frame} is a byte
+array of computable length, and \emph{framing} is the act of assembling bytes
+into frames. Invertible framing functions are codecs.
 
 \begin{mathpar}
   \Cs = \bigcup_{X, Y} \{X <-> Y\}
@@ -570,9 +569,6 @@ act of assembling bytes into frames.
     \Encode(x, f, \T) --> \Send(b, \T)
   }
 \end{mathpar}
-
-A \emph{codec} is a composable and invertible function for structured data
-serialization and other restructuring operations.
 
 \subsection*{Primitive codecs}
 
@@ -613,6 +609,8 @@ serialization and other restructuring operations.
     \Mx, \Tx |- \Release(m) --> \Mx \setminus \{m |--> \cdot\}, \Tx' |- \Void
   }
 \end{mathpar}
+
+\subsection*{Reading and writing messages}
 
 \begin{mathpar}
   \Read : \Ms -> \Bs
