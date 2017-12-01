@@ -535,10 +535,9 @@ Receives byte array $b$ over transport $\T$.
 \section{Codecs}
 \label{sec:protocol-codecs}
 
-A \emph{codec} is a composable and invertible function for structured data
-serialization and other restructuring operations. A \emph{frame} is a byte
-array of computable length, and \emph{framing} is the act of assembling bytes
-into frames. Invertible framing functions are codecs.
+A \emph{codec} is a composable and invertible function for restructuring data.
+A \emph{frame} is a byte array of computable length. A \emph{framing~codec} is
+a codec that produces or consumes frames.
 
 \begin{mathpar}
   \Cs = \bigcup_{X, Y} \{X <-> Y\}
