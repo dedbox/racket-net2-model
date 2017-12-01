@@ -47,6 +47,7 @@
 \DeclareMathOperator{\Bs}{\ensuremath{\mathcal{B}}}
 \DeclareMathOperator{\Cs}{\ensuremath{\mathcal{C}}}
 \DeclareMathOperator{\Ds}{\ensuremath{\mathcal{D}}}
+\DeclareMathOperator{\Fs}{\ensuremath{\mathcal{F}}}
 \DeclareMathOperator{\Is}{\ensuremath{\mathcal{I}}}
 \DeclareMathOperator{\Ls}{\ensuremath{\mathcal{L}}}
 \DeclareMathOperator{\Ms}{\ensuremath{\mathcal{M}}}
@@ -95,6 +96,7 @@
 
 % symbols
 \mathlig{|-->}{\mapsto}
+\mathlig{<->}{\leftrightarrow}
 \mathlig{-->}{\leadsto}
 \mathlig{=>}{\Downarrow}
 \mathlig{->}{\rightarrow}
@@ -417,7 +419,7 @@ Creates a port update $p_I'$ that reads byte array $b$ from port $p_I$.
   \end{Grammar}
   
   \caption{Transport syntax}
-  \label{fig:core-syntax}
+  \label{fig:transport-syntax}
 \end{figure}
 
 \begin{mathpar}
@@ -531,29 +533,55 @@ Receives byte array $b$ over transport $\T$.
 \end{figure}
 
 \section{Frames}
+\label{sec:protocol-frames}
 
 A \emph{frame} is a byte array of computable length, and \emph{framing} is the
 act of assembling bytes into frames.
 
 \section{Codecs}
+\label{sec:protocol-codecs}
 
-\begin{xxx}
-  $\Encode : * -> *$ is too generic. $\Decode : * -> *$ is too generic. This
-  can't be a driver API (like the Agent API) because the encode/decode
-  operations are too generic to specify meaningfully. We can start with a set
-  of primitive codecs.
-\end{xxx}
+\begin{mathpar}
+  \Cs = \bigcup_{X, Y} \{X <-> Y\}
 
-A \emph{codec} is a composable \XXX{(and invertible?)} procedure for
-restructuring data.
+  \Fs = \bigcup_X \{X <-> \Bs\}
+\end{mathpar}
 
-Example codecs:
-\begin{itemize}
-\item restructuring
-\item marshalling / serialization
-\end{itemize}
+\begin{mathpar}
+  \Decode : \Fs ** \Ts -> X
+
+  \Decode(f, \T) = x
+
+  \Infer[Dec]{
+    \Tx |- \Receive(\T) --> \Tx' |- b \and f^{-1}(b) = x
+  }{
+    \Tx |- \Decode(f, \T) --> \Tx' |- x
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \Encode : X ** \Fs ** \Ts -> \Void
+
+  \Encode(x, f, \T) = \Void
+
+  \Infer[Enc]{
+    f(x) = b
+  }{
+    \Encode(x, f, \T) --> \Send(b, \T)
+  }
+\end{mathpar}
+
+A \emph{codec} is a composable and invertible function for structured data
+serialization and other restructuring operations.
+
+\subsection*{Primitive codecs}
+
+\subsection*{Codec composition}
+
+\subsection*{Composite codecs}
 
 \section{Messengers}
+\label{sec:protocol-messengers}
 
 \subsection*{Primitive types}
 
@@ -564,23 +592,23 @@ Example codecs:
 \subsection*{Run-time state}
 
 \begin{mathpar}
-  \Mx : \Ms -> 2^{\Cs} ** \Ts
+  \Mx : \Ms -> \Cs ** \Ts
 \end{mathpar}
 
 \subsection*{Creating and destroying messengers}
 
 \begin{mathpar}
-  \Messenger : 2^{\Cs} ** \Ts -> \Ms
+  \Messenger : \Fs ** \Ts -> \Ms
 
-  \Messenger(cs, t) = m
+  \Messenger(f, t) = m
 
   \Infer[Msn]{
   }{
-    \Mx |- \Messenger(cs, t) --> [m |--> <cs, t>]\Mx |- m
+    \Mx |- \Messenger(f, t) --> [m |--> <f, t>]\Mx |- m
   }
 
   \Infer[RlsM]{
-    \Mx(m) = <cs, t> \and \Tx |- \Release(t) --> \Tx' |- \Void
+    \Mx(m) = <f, t> \and \Tx |- \Release(t) --> \Tx' |- \Void
   }{
     \Mx, \Tx |- \Release(m) --> \Mx \setminus \{m |--> \cdot\}, \Tx' |- \Void
   }
@@ -592,21 +620,26 @@ Example codecs:
   \Read(m) = b
 
   \Infer[Rd]{
+    \Mx(m) = <f, t>
   }{
-    \Mx |- \Read(m) --> \Mx' |- b
+    \Read(m) --> \Decode(f, t)
   }
 \end{mathpar}
 
 \begin{mathpar}
   \Write : \Bs ** \Ms -> \Void
 
+  \Write(b, m) = \Void
+
   \Infer[Wr]{
+    \Mx(m) = <f, t>
   }{
-    \Mx |- \Write(b, m) --> \Mx' |- \Void
+    \Write(x, m) --> \Encode(x, f, t)
   }
 \end{mathpar}
 
 \section{Clients and servers}
+\label{sec:protocol-clients-servers}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  BACK MATTER  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
