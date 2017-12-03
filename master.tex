@@ -549,9 +549,12 @@ Receives byte array $b$ over transport $t$.
 \section{Codecs}
 \label{sec:protocol-codecs}
 
-A \emph{codec} is a composable and invertible function for restructuring data.
-A \emph{frame} is a byte array of computable length. A \emph{framing~codec} is
-a codec that produces or consumes frames.
+A \emph{codec} is a function for restructuring data. A \emph{decoder} is a
+codec that consumes byte arrays. An \emph{encoder} is a codec that produces
+byte arrays.
+
+% A \emph{frame} is a byte array of computable length. A \emph{framing~codec} is
+% a codec that produces or consumes frames.
 
 \subsection*{Decoders}
 
