@@ -540,9 +540,15 @@ A \emph{frame} is a byte array of computable length. A \emph{framing~codec} is
 a codec that produces or consumes frames.
 
 \begin{mathpar}
-  \Cs = \bigcup_{X, Y} \{X <-> Y\}
+  \Cs = \text{codecs}
 
-  \Fs = \bigcup_X \{X <-> \Bs\}
+  \Fs = \text{framing codecs}
+\end{mathpar}
+
+\begin{mathpar}
+  \Cs : \bigcup_{X, Y} \{X <-> Y\}
+
+  \Fs : \bigcup_X \{X <-> \Bs\}
 \end{mathpar}
 
 \begin{mathpar}
