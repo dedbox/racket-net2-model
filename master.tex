@@ -128,9 +128,6 @@
 \newcommand{\Rule}[1]{\text{\textsc{#1}}}
 \newcommand{\Infer}[3][]{\inferrule{#2}{#3}~\Rule{#1}}
 
-% back matter
-\newcommand{\BackChapter}[1]{\chapter*{#1}\addcontentsline{toc}{chapter}{#1}}
-
 % glossary
 \newcommand{\GlossaryItem}[2]{
   \paragraph{#1} #2\vspace{-1ex}
@@ -650,7 +647,7 @@ a codec that produces or consumes frames.
 
 \appendix
 
-\BackChapter{Glossary}
+\chapter{Glossary}
 \label{cha:glossary}
 
 \GlossaryItem{agent}{A URL-addressable process capable of exchanging bytes.}
@@ -698,7 +695,7 @@ a codec that produces or consumes frames.
 \bibliography{references.bib} 
 \label{cha:references}
 
-\BackChapter{License}
+\chapter{License}
 \label{cha:license}
 
 \VerbatimInput{LICENSE}
