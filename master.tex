@@ -396,13 +396,13 @@ Creates a port update $p_I'$ that reads byte array $b$ from port $p_I$.
   \centering
 
   \begin{Grammar}
-    t
-    &::=& \Listen(t) & bind authority \\
-    & | & \Accept(t) & accept connection \\
-    & | & \Connect(t) & connect to authority \\
-    & | & \Release(t) & unbind / disconnect \\
-    & | & \Send(t, t) & send bytes \\
-    & | & \Receive(t) & receive bytes \\
+    \tau
+    &::=& \Listen(\tau) & bind authority \\
+    & | & \Accept(\tau) & accept connection \\
+    & | & \Connect(\tau) & connect to authority \\
+    & | & \Release(\tau) & unbind / disconnect \\
+    & | & \Send(\tau, \tau) & send bytes \\
+    & | & \Receive(\tau) & receive bytes \\
   \end{Grammar}
   \hfill
   \begin{Grammar}
