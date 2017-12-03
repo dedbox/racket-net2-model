@@ -96,7 +96,6 @@
 \newcommand{\Tx}{\text{T}}
 \newcommand{\Dx}{\text{D}}
 \newcommand{\Mx}{\text{M}}
-\newcommand{\T}{\uptau}
 
 % helpers
 \DeclareMathOperator{\Accepter}{accepter}
@@ -335,9 +334,9 @@ authority authority $a_L$, the host platform queues requests to connect to
 $a_L$ under $\ell$ for as long as $\Lx(\ell) = a_L$.
 
 $\Tx$ records the addresses and ports of established connections. Given
-transport $\T$, addresses $a_L, a_R$, and ports $p_I, p_O$, the host platform
+transport $t$, addresses $a_L, a_R$, and ports $p_I, p_O$, the host platform
 establishes a connection between local authority $a_L$ and remote authority
-$a_R$ for as long as $\Tx(\T) = (a_L, a_R, p_I, p_O)$. Updating $p_I$ or $p_O$
+$a_R$ for as long as $\Tx(t) = (a_L, a_R, p_I, p_O)$. Updating $p_I$ or $p_O$
 will exchange bytes over the connection.
 
 \section{The Agent API}
@@ -357,20 +356,20 @@ authority $a_L$.
 \begin{mathpar}
   \Accepter : \Ls -> \Ts ** \As ** \Is ** \Os
 
-  \Accepter(\ell) = <\T, a_R, p_I, p_O>
+  \Accepter(\ell) = <t, a_R, p_I, p_O>
 \end{mathpar}
 
-Creates a reference $\T$ to a connection request from remote authority $a_R$
+Creates a reference $t$ to a connection request from remote authority $a_R$
 queued under listener $\ell$. Opens ports $p_I, p_O$ for exchanging bytes over
 the connection.
 
 \begin{mathpar}
   \Connector : \As -> \Ts ** \As ** \Is ** \Os
 
-  \Connector(a_R) = <\T, a_L, p_I, p_O>
+  \Connector(a_R) = <t, a_L, p_I, p_O>
 \end{mathpar}
 
-Creates a reference $\T$ to a connection from local authority $a_L$ to remote
+Creates a reference $t$ to a connection from local authority $a_L$ to remote
 authority $a_R$. Opens ports $p_I, p_O$ for exchanging bytes over the
 connection.
 
@@ -411,7 +410,7 @@ Creates a port update $p_I'$ that reads byte array $b$ from port $p_I$.
     &::=& a & authority \\
     & | & b & byte array \\
     & | & \ell & listener \\
-    & | & \T & transport \\
+    & | & t & transport \\
     & | & u & URI \\
     & | & \Void & void \\
   \end{Grammar}
@@ -437,30 +436,30 @@ Creates a listener $\ell$ on local authority $a_L$.
 \begin{mathpar}
   \Accept : \Ls -> \Ts
 
-  \Accept(\ell) = \T
+  \Accept(\ell) = t
 
   \Infer[Acc]{
-    \Lx(\ell) = u_L \and \Accepter(\ell) = <\T, a_R, p_I, p_O>
+    \Lx(\ell) = u_L \and \Accepter(\ell) = <t, a_R, p_I, p_O>
   }{
-    \Tx |- \Accept(\ell) --> [\T |--> <a_L, a_R, p_I, p_O>]\Tx |- \T
+    \Tx |- \Accept(\ell) --> [t |--> <a_L, a_R, p_I, p_O>]\Tx |- t
   }
 \end{mathpar}
 
-Accepts a transport $\T$ from listener $\ell$.
+Accepts a transport $t$ from listener $\ell$.
 
 \begin{mathpar}
   \Connect : \As -> \Ts
 
-  \Connect(a) = \T
+  \Connect(a) = t
 
   \Infer[Con]{
-    \Connector(a_R) = <\T, a_L, p_I, p_O>
+    \Connector(a_R) = <t, a_L, p_I, p_O>
   }{
-    \Tx |- \Connect(a_R) --> [\T |--> <a_L, a_R, p_I, p_O>]\Tx |- \T
+    \Tx |- \Connect(a_R) --> [t |--> <a_L, a_R, p_I, p_O>]\Tx |- t
   }
 \end{mathpar}
 
-Connects a transport $\T$ from local authority $a_L$ to remote authority
+Connects a transport $t$ from local authority $a_L$ to remote authority
 $a_R$.
 
 \begin{mathpar}
@@ -484,30 +483,30 @@ transport.
 \begin{mathpar}
   \Send : \Bs ** \Ts -> \Void
 
-  \Send(b, \T) = \Void
+  \Send(b, t) = \Void
 
   \Infer[Snd]{
-    \Tx(\T) = <a_L, a_R, p_I, p_O> \and \Sender(b, p_O) = p_O'
+    \Tx(t) = <a_L, a_R, p_I, p_O> \and \Sender(b, p_O) = p_O'
   }{
-    \Tx |- \Send(b, \T) --> [\T |--> <a_L, a_R, p_I, p_O'>]\Tx |- \Void
+    \Tx |- \Send(b, t) --> [t |--> <a_L, a_R, p_I, p_O'>]\Tx |- \Void
   }
 \end{mathpar}
   
-Sends byte array $b$ over transport $\T$.
+Sends byte array $b$ over transport $t$.
 
 \begin{mathpar}
   \Receive : \Ts -> \Bs
 
-  \Receive(\T) = b
+  \Receive(t) = b
 
   \Infer[Rcv]{
-    \Tx(\T) = <a_L, a_R, p_I, p_O> \and \Receiver(p_I) = <b, p_I'>
+    \Tx(t) = <a_L, a_R, p_I, p_O> \and \Receiver(p_I) = <b, p_I'>
   }{
-    \Tx |- \Receive(\T) --> [\T |--> <a_L, a_R, p_I', p_O>]\Tx |- b
+    \Tx |- \Receive(t) --> [t |--> <a_L, a_R, p_I', p_O>]\Tx |- b
   }
 \end{mathpar}
 
-Receives byte array $b$ over transport $\T$.
+Receives byte array $b$ over transport $t$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  CHAPTER  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -559,12 +558,12 @@ a codec that produces or consumes frames.
 \begin{mathpar}
   \Decode : \Ds ** \Ts -> X
 
-  \Decode(d, \T) = x
+  \Decode(d, t) = x
 
   \Infer[Dec]{
-    \Tx |- \Receive(\T) --> \Tx' |- b \and d(b) = x
+    \Tx |- \Receive(t) --> \Tx' |- b \and d(b) = x
   }{
-    \Tx |- \Decode(d, \T) --> \Tx' |- x
+    \Tx |- \Decode(d, t) --> \Tx' |- x
   }
 \end{mathpar}
 
@@ -573,12 +572,12 @@ a codec that produces or consumes frames.
 \begin{mathpar}
   \Encode : X ** \Es ** \Ts -> \Void
 
-  \Encode(x, e, \T) = \Void
+  \Encode(x, e, t) = \Void
 
   \Infer[Enc]{
     e(x) = b
   }{
-    \Encode(x, e, \T) --> \Send(b, \T)
+    \Encode(x, e, t) --> \Send(b, t)
   }
 \end{mathpar}
 
@@ -620,11 +619,11 @@ a codec that produces or consumes frames.
 
   \Infer[Msn]{
   }{
-    \Mx |- \Messenger(d, e, \T) --> [m |--> <d, e, \T>]\Mx |- m
+    \Mx |- \Messenger(d, e, t) --> [m |--> <d, e, t>]\Mx |- m
   }
 
   \Infer[RlsM]{
-    \Mx(m) = <d, e, \T> \and \Tx |- \Release(\T) --> \Tx' |- \Void
+    \Mx(m) = <d, e, t> \and \Tx |- \Release(t) --> \Tx' |- \Void
   }{
     \Mx, \Tx |- \Release(m) --> \Mx \setminus \{m |--> \cdot\}, \Tx' |- \Void
   }
@@ -638,9 +637,9 @@ a codec that produces or consumes frames.
   \Read(m) = b
 
   \Infer[Rd]{
-    \Mx(m) = <d, e, \T>
+    \Mx(m) = <d, e, t>
   }{
-    \Read(m) --> \Decode(d, \T)
+    \Read(m) --> \Decode(d, t)
   }
 \end{mathpar}
 
@@ -650,9 +649,9 @@ a codec that produces or consumes frames.
   \Write(b, m) = \Void
 
   \Infer[Wr]{
-    \Mx(m) = <d, e, \T>
+    \Mx(m) = <d, e, t>
   }{
-    \Write(x, m) --> \Encode(x, e, \T)
+    \Write(x, m) --> \Encode(x, e, t)
   }
 \end{mathpar}
 
