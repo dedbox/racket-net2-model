@@ -531,6 +531,22 @@ Receives byte array $b$ over transport $\T$.
   \label{fig:protocol-api-stack}
 \end{figure}
 
+\begin{mathpar}
+  \Cs = \text{codecs}
+  
+  \Ds = \text{decoders}
+
+  \Es = \text{encoders}
+\end{mathpar}
+
+\begin{mathpar}
+  \Cs : \{X -> Y\}
+  
+  \Ds : \{\Bs -> X\}
+
+  \Es : \{X -> \Bs\}
+\end{mathpar}
+
 \section{Codecs}
 \label{sec:protocol-codecs}
 
@@ -538,47 +554,47 @@ A \emph{codec} is a composable and invertible function for restructuring data.
 A \emph{frame} is a byte array of computable length. A \emph{framing~codec} is
 a codec that produces or consumes frames.
 
-\begin{mathpar}
-  \Cs = \text{codecs}
-
-  \Fs = \text{framing codecs}
-\end{mathpar}
+\subsection*{Decoders}
 
 \begin{mathpar}
-  \Cs : \bigcup_{X, Y} \{X <-> Y\}
+  \Decode : \Ds ** \Ts -> X
 
-  \Fs : \bigcup_X \{X <-> \Bs\}
-\end{mathpar}
-
-\begin{mathpar}
-  \Decode : \Fs ** \Ts -> X
-
-  \Decode(f, \T) = x
+  \Decode(d, \T) = x
 
   \Infer[Dec]{
-    \Tx |- \Receive(\T) --> \Tx' |- b \and f^{-1}(b) = x
+    \Tx |- \Receive(\T) --> \Tx' |- b \and d(b) = x
   }{
-    \Tx |- \Decode(f, \T) --> \Tx' |- x
+    \Tx |- \Decode(d, \T) --> \Tx' |- x
   }
 \end{mathpar}
+
+\subsection*{Encoders}
 
 \begin{mathpar}
-  \Encode : X ** \Fs ** \Ts -> \Void
+  \Encode : X ** \Es ** \Ts -> \Void
 
-  \Encode(x, f, \T) = \Void
+  \Encode(x, e, \T) = \Void
 
   \Infer[Enc]{
-    f(x) = b
+    e(x) = b
   }{
-    \Encode(x, f, \T) --> \Send(b, \T)
+    \Encode(x, e, \T) --> \Send(b, \T)
   }
 \end{mathpar}
 
-\subsection*{Primitive codecs}
+\subsection*{Composites}
 
-\subsection*{Codec composition}
+\begin{mathpar}
+  c : X -> Y
 
-\subsection*{Composite codecs}
+  d : \Bs -> X
+
+  e : Y -> \Bs
+
+  c \circ d : \Bs -> Y
+
+  e \circ c : X -> \Bs
+\end{mathpar}
 
 \section{Messengers}
 \label{sec:protocol-messengers}
@@ -592,23 +608,23 @@ a codec that produces or consumes frames.
 \subsection*{Run-time state}
 
 \begin{mathpar}
-  \Mx : \Ms -> \Fs ** \Ts
+  \Mx : \Ms -> \Ds ** \Es ** \Ts
 \end{mathpar}
 
 \subsection*{Creating and destroying messengers}
 
 \begin{mathpar}
-  \Messenger : \Fs ** \Ts -> \Ms
+  \Messenger : \Ds ** \Es ** \Ts -> \Ms
 
-  \Messenger(f, t) = m
+  \Messenger(d, e, t) = m
 
   \Infer[Msn]{
   }{
-    \Mx |- \Messenger(f, t) --> [m |--> <f, t>]\Mx |- m
+    \Mx |- \Messenger(d, e, \T) --> [m |--> <d, e, \T>]\Mx |- m
   }
 
   \Infer[RlsM]{
-    \Mx(m) = <f, t> \and \Tx |- \Release(t) --> \Tx' |- \Void
+    \Mx(m) = <d, e, \T> \and \Tx |- \Release(\T) --> \Tx' |- \Void
   }{
     \Mx, \Tx |- \Release(m) --> \Mx \setminus \{m |--> \cdot\}, \Tx' |- \Void
   }
@@ -622,9 +638,9 @@ a codec that produces or consumes frames.
   \Read(m) = b
 
   \Infer[Rd]{
-    \Mx(m) = <f, t>
+    \Mx(m) = <d, e, \T>
   }{
-    \Read(m) --> \Decode(f, t)
+    \Read(m) --> \Decode(d, \T)
   }
 \end{mathpar}
 
@@ -634,9 +650,9 @@ a codec that produces or consumes frames.
   \Write(b, m) = \Void
 
   \Infer[Wr]{
-    \Mx(m) = <f, t>
+    \Mx(m) = <d, e, \T>
   }{
-    \Write(x, m) --> \Encode(x, f, t)
+    \Write(x, m) --> \Encode(x, e, \T)
   }
 \end{mathpar}
 
@@ -658,7 +674,8 @@ a codec that produces or consumes frames.
   $\As$ & URI authorities \\
   $\Bs$ & byte arrays \\
   $\Cs$ & codecs \\
-  $\Fs$ & framing codecs \\
+  $\Ds$ & decoders \\
+  $\Es$ & encoders \\
   $\Is$ & input ports \\
   $\Ls$ & listeners \\
   $\Ms$ & messengers \\
