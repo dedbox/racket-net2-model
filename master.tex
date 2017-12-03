@@ -273,8 +273,6 @@ is a pair of opposing byte streams.
   \Ls = \text{listeners}
 
   \Ts = \text{transports}
-
-  \Rs = \Ls \cup \Ts
 \end{mathpar}
 
 A \emph{reference} is an opaque token that represents a portion of run-time
@@ -310,7 +308,9 @@ useful result.
 \label{sec:transport-dictionaries}
 
 \begin{mathpar}
-  \Ds = \{\Rs -> *\}
+  \Ds = \text{dictionaries}
+
+  \Ds : \{\Ls \cup \Ms \cup \Ts -> *\}
 \end{mathpar}
 
 A \emph{dictionary} is an associative array. Dictionaries associate references
@@ -474,17 +474,18 @@ Connects a transport $\T$ from local authority $a_L$ to remote authority
 $a_R$.
 
 \begin{mathpar}
-  \Release : \Rs -> \Void
+  \Release : X -> \Void
 
-  \Release(r) = \Void
+  \Release(x) = \Void
 
   \Infer[Rls]{
+    \{x |--> \cdot\} \in X
   }{
-    \Lx |- \Release(r) --> \Lx \setminus \{r |--> \cdot\} |- \Void
+    X |- \Release(x) --> X \setminus \{x |--> \cdot\} |- \Void
   }
 \end{mathpar}
 
-Stops listening when $r$ is a listener. Closes the connection when $r$ is a
+Stops listening when $x$ is a listener. Closes the connection when $x$ is a
 transport.
 
 \section{Exchanging bytes}
@@ -675,7 +676,6 @@ a codec that produces or consumes frames.
   $\Os$ & output ports \\
   $\Ps$ & URI paths \\
   $\Qs$ & URI queries \\
-  $\Rs$ & references \\
   $\Ss$ & URI schemes \\
   $\Ts$ & transports \\
   $\Void$ & void \\
