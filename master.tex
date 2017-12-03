@@ -304,17 +304,19 @@ A \emph{literal} is a fixed unit of data. A byte array is a unit of data
 exchange. The void literal is returned by operations with a side effect and no
 useful result.
 
-\section{Dictionaries}
-\label{sec:transport-dictionaries}
+\section{Run-time state}
+\label{sec:transport-run-time-state}
 
 \begin{mathpar}
-  \Ds = \text{dictionaries}
+  \Lx : \Ls -> \As
 
-  \Ds : \{\Ls \cup \Ms \cup \Ts -> *\}
+  \Tx : \Ts -> \As ** \As ** \Is ** \Os
 \end{mathpar}
 
-A \emph{dictionary} is an associative array. Dictionaries associate references
-to some underlying data. Associations can be added, removed, or looked up.
+The run-time state is modeled as a set of dictionaries. A \emph{dictionary} is
+an associative array. Dictionaries associate references to some underlying
+data. Associations can be added, removed, or looked up. All side effects occur
+during operations on dictionaries in the run-time state.
 
 \begin{figure}
   \centering
@@ -327,18 +329,6 @@ to some underlying data. Associations can be added, removed, or looked up.
   \caption{Dictionary notation}
   \label{fig:dictionary-notation}
 \end{figure}
-
-\section{Run-time state}
-\label{sec:transport-run-time-state}
-
-\begin{mathpar}
-  \Lx : \Ls -> \As
-
-  \Tx : \Ts -> \As ** \As ** \Is ** \Os
-\end{mathpar}
-
-The run-time state is a set of dictionaries. All side effects occur during
-operations on dictionaries in the run-time state.
 
 $\Lx$ records the addresses of listeners. Given listener $\ell$ and local
 authority authority $a_L$, the host platform queues requests to connect to
@@ -668,7 +658,6 @@ a codec that produces or consumes frames.
   $\As$ & URI authorities \\
   $\Bs$ & byte arrays \\
   $\Cs$ & codecs \\
-  $\Ds$ & dictionaries \\
   $\Fs$ & framing codecs \\
   $\Is$ & input ports \\
   $\Ls$ & listeners \\
